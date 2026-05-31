@@ -122,16 +122,21 @@
         }
     }
 
-    // Top frame listens for iframes requesting current state on their init
+    // Top frame listens for iframes requesting current state or a toggle
     function listenForFrameQueries() {
         window.addEventListener('message', function (e) {
-            if (e.data && e.data.atiQuery === 'getState' && e.source) {
+            if (!e.data) return;
+            if (e.data.atiQuery === 'getState' && e.source) {
                 try {
                     e.source.postMessage(
                         { atiAction: isActive() ? 'focusOn' : 'focusOff' },
                         '*'
                     );
                 } catch (err) {}
+            }
+            // Iframe keyboard shortcut forwards here to trigger a real toggle
+            if (e.data.atiQuery === 'toggle') {
+                toggleFocusMode();
             }
         });
     }
@@ -168,9 +173,19 @@
     /* ── Keyboard shortcut (top frame only) ── */
     function bindShortcut() {
         document.addEventListener('keydown', function (e) {
-            if (e.altKey && (e.key === 'h' || e.key === 'H')) {
+            if (e.altKey && e.code === 'KeyH') {
                 e.preventDefault();
                 toggleFocusMode();
+            }
+        });
+    }
+
+    /* ── Keyboard shortcut (iframe) — forwards to top frame ── */
+    function bindIframeShortcut() {
+        document.addEventListener('keydown', function (e) {
+            if (e.altKey && e.code === 'KeyH') {
+                e.preventDefault();
+                window.parent.postMessage({ atiQuery: 'toggle' }, '*');
             }
         });
     }
@@ -186,8 +201,10 @@
             }
             console.log('[ATI Focus Mode] Ready. Press Option+H (⌥H) or click the badge.');
         } else {
-            // Iframe: listen for toggle commands, then ask the top frame for current state
+            // Iframe: listen for toggle commands, bind shortcut to message parent,
+            // then ask the top frame for current state
             listenForCommands();
+            bindIframeShortcut();
             window.parent.postMessage({ atiQuery: 'getState' }, '*');
         }
     }
