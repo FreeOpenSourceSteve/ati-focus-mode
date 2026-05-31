@@ -1,5 +1,52 @@
+/* ============================================================
+   ATI Time Hider — styles.css
+   ============================================================ */
+
+/* Always hidden — timer label, even when Focus Mode is off. Nobody is allowed the timer. */
 .timespentlbl {
+    display: none !important;
+}
+
+/*
+   Focus mode hide class. (Overkill but I take no chances)
+   content.js applies this directly to each matched element.
+*/
+.ati-hidden {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* ============================================================
+   Toggle badge — injected by content.js
+   ============================================================ */
+#ati-focus-badge {
+    position: fixed;
+    bottom: 12px;
+    left: 80%;
+    transform: translateX(-50%);
+    right: auto;
+    z-index: 2147483647;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border: none;
+}
+
+#ati-focus-badge.badge-inactive {
+    background-color: #2e8094;
+    color: #fff;
+}
+
+#ati-focus-badge.badge-active {
+    background-color: #fff;
+    color: #2e8094;
+    border: 1px solid #2e8094;
 }

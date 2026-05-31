@@ -1,31 +1,56 @@
-## ATI Timer Hider
-A lightweight Chrome extension to hide the "Time spent" live counter on the ATI study platform. Designed to reduce distraction and timer-related anxiety during study sessions.
+## ATI Focus Mode
+
+A lightweight Chrome extension for the ATI study platform that hides distracting UI elements so you can focus on the content. Designed to reduce timer anxiety and visual clutter during study sessions.
 
 ### Features
-**Total Hidden State**: Uses multiple CSS properties to ensure the timer is completely invisible.
 
-**Zero Interference**: Does not stop or break the actual timer; it only hides it from your view.
+**Focus Mode Toggle**: Hide or restore all targeted elements instantly using the badge button or keyboard shortcut. Everything comes back exactly as it was when you toggle off.
 
-**Simple Logic**: No complex scripts; just a direct UI override.
+**Keyboard Shortcut**: Press **Option + H (⌥H)** from anywhere on the page — works whether your focus is in the main page or the reading iframe.
 
-### Technical Details
-The extension targets the .timespentlbl class using the following CSS:
-```
-.timespentlbl {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-}
-```
-### Installation Instructions
-Since this extension is custom-built, you must "sideload" it into your browser:
+**Persistent State**: Focus mode stays on as you navigate between pages within the same session.
 
-1. Download/Clone this repository to a folder on your computer (Click "**Code**" and then "**Download Zip**")
-2. Open Google Chrome and navigate to chrome://extensions/
-3. Enable Developer mode using the toggle in the top-right corner
-4. Click the Load unpacked button
-5. Select the folder (*ati-timer-hider-main*) containing your extension files (**Must unzip**)
-6. Navigate to ATI and the timer will now be hidden
+**Zero Interference**: Nothing is stopped, broken, or modified on the backend. Only the visual display is affected. The timer still runs; you just can't see it.
 
-### Chrome Extension Store Status
-I will get this added to the chrome store. I want to add a simple popup that toggles visibility first. If you have other features you want let me know. 
+**Always Hidden**: The live "Time spent" timer counter is hidden at all times, even when Focus Mode is off. I hate the timer so much I took it away from everyone.
+
+### What Gets Hidden in Focus Mode
+
+- Top white header (ATI logo, book title, AI search, Close button)
+- Blue sub-header (hamburger menu, module title)
+- Main navigation bar (course title, Search, My Annotations, Settings & Help)
+- Page tools toolbar (Audio Tools, annotation controls)
+- TTS read-along overlay
+- Bottom pagination footer
+- Prev/Next navigation footer
+- Back-to-top button
+- Pendo help badge
+
+### How to Use
+
+| Action | Result |
+|---|---|
+| Press **⌥H** (Option + H) | Toggle Focus Mode on/off |
+| Click the **badge button** (bottom right) | Toggle Focus Mode on/off |
+
+The badge reads **Focus OFF** when elements are visible and **Focus ON** when they are hidden.
+
+### Installation
+
+Since this extension is not yet on the Chrome Web Store, you must sideload it:
+
+1. Download or clone this repository to your computer (click **Code** → **Download ZIP**)
+2. Unzip the downloaded file
+3. Open Chrome and go to `chrome://extensions/`
+4. Enable **Developer mode** using the toggle in the top-right corner
+5. Click **Load unpacked**
+6. Select the unzipped folder containing the extension files
+7. Navigate to ATI — the extension is now active
+
+To update after making changes to the files, return to `chrome://extensions/` and click the refresh icon on the extension card, then hard-refresh the ATI page with **⌘ + Shift + R**.
+
+### Adding or Removing Hidden Elements
+
+Open `content.js` and find the `SELECTORS` array near the top of the file. Each line is a CSS selector for one targeted element. Add a new line to hide something additional, or delete a line to stop hiding it. See the comments in the file for guidance on finding selectors using Chrome DevTools.
+
+After any edit, reload the extension at `chrome://extensions/` and hard-refresh the ATI page.
