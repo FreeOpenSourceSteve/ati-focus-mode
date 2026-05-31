@@ -6,7 +6,7 @@ A lightweight Chrome extension for the ATI study platform that hides distracting
 
 **Focus Mode Toggle**: Hide or restore all targeted elements instantly using the badge button or keyboard shortcut. Everything comes back exactly as it was when you toggle off.
 
-**Keyboard Shortcut**: (Not Working) Press **Option + H (⌥H)** from anywhere on the page — works whether your focus is in the main page or the reading iframe.
+**Keyboard Shortcut**: Press **Option + H (⌥H)** from anywhere on the page — works whether your focus is in the main page or the reading iframe.
 
 **Persistent State**: Focus mode stays on as you navigate between pages within the same session.
 
