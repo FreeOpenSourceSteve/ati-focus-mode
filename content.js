@@ -9,6 +9,10 @@
  * The iframe receives toggle commands via postMessage so both frames
  * stay in sync from a single control point.
  *
+ * Focus Mode also forces all accordion panels open simultaneously
+ * and prevents clicking from closing them. Accordions collapse fully
+ * when Focus Mode is turned off.
+ *
  * Toggle: Option+H (⌥H) or the badge button (top frame only).
  */
 
@@ -62,6 +66,79 @@
         });
     }
 
+    /* ── Accordion: expand all panels, block click-to-close ────────────
+     *
+     * Bootstrap enforces single-open via two mechanisms:
+     *   1. data-parent on each .collapse panel — tells Bootstrap to close
+     *      siblings when one opens. We store the value in data-ati-parent
+     *      and remove the attribute to sever this link.
+     *   2. Click handler on .btn.action-bar buttons — toggles individual
+     *      panels. We intercept clicks in the capture phase to block it.
+     *
+     * On Focus Mode off: data-parent is restored, all panels collapsed,
+     * click interception removed. Accordions return to normal behavior.
+     * ────────────────────────────────────────────────────────────────── */
+
+    function expandAccordions(root) {
+        root = root || document;
+
+        // Store data-parent then remove it so Bootstrap can't close siblings
+        root.querySelectorAll('.collapse[data-parent]').forEach(function (panel) {
+            panel.setAttribute('data-ati-parent', panel.getAttribute('data-parent'));
+            panel.removeAttribute('data-parent');
+        });
+
+        // Open every panel
+        root.querySelectorAll('.collapse').forEach(function (panel) {
+            panel.classList.add('show');
+        });
+
+        // Update button state
+        root.querySelectorAll('.btn.action-bar').forEach(function (btn) {
+            btn.setAttribute('aria-expanded', 'true');
+            btn.classList.remove('collapsed');
+        });
+    }
+
+    function collapseAccordions() {
+        // Restore data-parent on all panels we modified
+        document.querySelectorAll('.collapse[data-ati-parent]').forEach(function (panel) {
+            panel.setAttribute('data-parent', panel.getAttribute('data-ati-parent'));
+            panel.removeAttribute('data-ati-parent');
+            panel.classList.remove('show');
+        });
+
+        // Collapse any remaining open panels
+        document.querySelectorAll('.collapse.show').forEach(function (panel) {
+            panel.classList.remove('show');
+        });
+
+        // Reset button state
+        document.querySelectorAll('.btn.action-bar').forEach(function (btn) {
+            btn.setAttribute('aria-expanded', 'false');
+            btn.classList.add('collapsed');
+        });
+    }
+
+    // Intercept accordion button clicks in capture phase so Bootstrap never sees them
+    function blockAccordionClick(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    }
+
+    function lockAccordions(root) {
+        root = root || document;
+        root.querySelectorAll('.btn.action-bar').forEach(function (btn) {
+            btn.addEventListener('click', blockAccordionClick, true);
+        });
+    }
+
+    function unlockAccordions() {
+        document.querySelectorAll('.btn.action-bar').forEach(function (btn) {
+            btn.removeEventListener('click', blockAccordionClick, true);
+        });
+    }
+
     /* ── MutationObserver: tag newly-rendered elements immediately ── */
     function startObserver() {
         if (observer) return;
@@ -69,6 +146,8 @@
             mutations.forEach(function (mutation) {
                 mutation.addedNodes.forEach(function (node) {
                     if (node.nodeType !== 1) return;
+
+                    // Hide targeted UI elements
                     SELECTORS.forEach(function (sel) {
                         if (node.matches && node.matches(sel)) {
                             node.classList.add(HIDE_CLASS);
@@ -79,6 +158,14 @@
                             });
                         }
                     });
+
+                    // Expand any accordion panels in the new node
+                    if (node.querySelectorAll) {
+                        if (node.querySelector('.collapse')) {
+                            expandAccordions(node);
+                            lockAccordions(node);
+                        }
+                    }
                 });
             });
         });
@@ -96,10 +183,14 @@
     function applyFocusMode(active) {
         if (active) {
             hideAll();
+            expandAccordions();
+            lockAccordions();
             startObserver();
         } else {
             stopObserver();
             showAll();
+            unlockAccordions();
+            collapseAccordions();
         }
         if (IS_TOP) {
             updateBadge(active);
@@ -122,7 +213,7 @@
         }
     }
 
-    // Top frame listens for iframes requesting current state or a toggle
+    // Top frame listens for iframes requesting current state or requesting a toggle
     function listenForFrameQueries() {
         window.addEventListener('message', function (e) {
             if (!e.data) return;
@@ -170,7 +261,7 @@
         badge.className   = active ? 'badge-active' : 'badge-inactive';
     }
 
-    /* ── Keyboard shortcut (top frame only) ── */
+    /* ── Keyboard shortcut (top frame) ── */
     function bindShortcut() {
         document.addEventListener('keydown', function (e) {
             if (e.altKey && e.code === 'KeyH') {
