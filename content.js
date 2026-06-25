@@ -38,6 +38,7 @@
         '.btn-back-to-top',
         '._pendo-badge-image',
         '[data-_pendo-image-1]',
+        '.content-question',
         'button[data-layout="badgeResourceCenter"]',
     ];
 
